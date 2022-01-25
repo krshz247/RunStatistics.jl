@@ -3,7 +3,6 @@
 using RunStatistics
 using Test
 
-
-@testset "hello_world" begin
-    @test RunStatistics.hello_world() == 42
+@testset "t_obs" begin
+    @test RunStatistics.t_obs([-1, 1, 3, -2], 0, 1) == (10.0, Integer[2,3])
 end
