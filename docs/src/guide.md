@@ -66,7 +66,6 @@ To obtain the exact p-value given the value of ``T_{obs}`` for ``N \lesssim 100`
 julia> squares_pvalue(T_obs, N)
 ```
 or
-<!-- the p value is defined as 1 - cdf. I don't know how you define the cdf in your code but it should follow that convention! -->
 ```Julia
 julia> squares_cdf(T_obs, N)
 ```
@@ -164,9 +163,9 @@ F(T_{obs} | nN) = \frac{F(T_{obs} | N)^n}{(1 + \Delta(T_{obs}))^{n-1}} \quad \te
 \end{align}
 ```
 
-``F(T_{obs} | L) \equiv P(T < T_{obs} | N)`` denotes the value of the cumulative of ``T`` for a sequence of ``L`` observations.
+``F(T_{obs} | L) \equiv P(T < T_{obs} | L)`` denotes the value of the cumulative of ``T`` for a (long) sequence of ``L`` observations. 
 
-So, if a total number of ``L`` data points have been observed, choose ``n`` and ``N`` so that ``n \cdot N = L``. The exact value of ``P(T < T_{obs} | N)`` is then calculated and further processed in accordance with the above equation.
+So, if a total number of ``L`` data points have been observed, choose ``n`` and ``N`` so that ``n \cdot N = L``. The exact value of ``F(T_{obs} | N) \equiv P(T < T_{obs} | N)`` is then calculated and further processed in accordance with the above equation.
 
 The approximate p-value for the data set then is:
 
@@ -177,8 +176,6 @@ p = 1 - F(T_{obs} | nN)
 ```
 
 ``\Delta(T_{obs})`` is a correction term (see equation (13) in [^2]) whose computation involves a 1D numerical integration. This is performed with the `quadgk()` function from the [`QuadGK.jl`](https://juliapackages.com/p/quadgk) package.
-
-
 ### Accuracy
 ---
 
@@ -208,6 +205,8 @@ julia> squares_cdf_approx(T_obs, L, epsp)
 
 This call yields a conservative approximation by setting the absolute error tolerance of the 1D integration that yields ``\Delta(T)`` to be one order of magnitude greater than necessary for the desired accuracy `epsp` of ``p`` or the cumulative. If not specified, the default value of the `quadgk()` function used for the integration is used. See [documentation](https://juliamath.github.io/QuadGK.jl/stable/).
 
+---
+
 **Rule of thumb**: to obtain a quick approximation of ``p`` or ``F(T | nN)``, call:
 
 ```Julia
@@ -217,7 +216,7 @@ or
 ```Julia
 julia> squares_cdf_approx(T_obs, L)
 ```
-And if a certain accuracy `epsp` ``\leq 10^{-14}`` is desired, call:
+And if a certain accuracy `epsp` ``\geq n \cdot 10^{-14}`` is desired, call:
 
 ```Julia
 julia> squares_pvalue_approx(T_obs, L, epsp)

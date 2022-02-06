@@ -11,7 +11,7 @@ function cachechi2(T_obs::Real, N::Int)
     res = zeros(N + 1)
     res[1] = NaN
 
-    for i = firstindex(res)+1:lastindex(res)
+    for i = firstindex(res) + 1 :lastindex(res)
         
         res[i] = logcdf(Chisq(i - 1), T_obs)
     end
@@ -58,18 +58,12 @@ function squares_cdf(T_obs::Real, N::Integer)
 
     end
 
-
     log_cumulative = cachechi2(T_obs, N)
 
     logpow2N1 = (N <= 63) ? log((1 << N) - 1) : N * log(2)
 
     p = zero(T)
 
-    # p = Threads.Atomic{float(T)}(0)
-    # Ps = zeros(Real, numthreads)
-
-    #TODO: think about creating a Partition() object for each thread and then initiate it within the thread
-    #Threads.@threads 
     for r = 1:N
 
         Mmax = min(r, N - r + 1)
@@ -101,11 +95,9 @@ function squares_cdf(T_obs::Real, N::Integer)
                 done = next_partition!(g)
             end
 
-            #Ps[threadid()] += exp(scale + log(ppi))
             p += exp(scale + log(ppi))
         end
     end
-    #p = sum(Ps)
 
     @assert p < 1
     return p

@@ -34,7 +34,6 @@ The hypothesis ``\mathcal{H}`` for the data is:
 - Each observation is normally distributed, ``X_i \sim \mathcal{N}(\mu_i, \sigma^2_i)``
 - Mean ``\mu_i`` and variance ``\sigma^2_i`` are known.
 
-<!-- I would use ** to emphasize runs instead `` but it's up to taste -->
 ``T`` is based on `runs` of weighted deviations from a mean value, observed in samples ``X_i`` from independent normal distributions.
 
 A `run` in this context refers to a sequence of observations that share a common attribute commonly called a `success`. Here an observation is called a *success*, ``S``, if the observed value exceeds the expected value. Similarly, an expected value exceeding the observation is considered a *failure*, ``F``.
@@ -46,9 +45,8 @@ A `run` in this context refers to a sequence of observations that share a common
     failure runs. Denote by ``A_j = \{X_{j_1} ,X_{j_2}, ...\}`` the set of
     observations in the ``j``-th success run.
 
--  Associate a weight ``\omega(A_j)`` with each success run:
+-  Associate a weight ``\omega(A_j)`` with each success run, where the sum over i is understood to cover all ``X_i \in A_j``:
 
-<!-- index i in the sum is not defined well.  Copy the explanation following (4) in https://arxiv.org/pdf/1005.3233.pdf as the rest of the text here is mostly copied, too -->
 ```math
 \begin{align}
 \omega(A_j) \equiv \chi_{run,j}^2 = \displaystyle\sum_i\frac{(X_i-\mu_i)^2}{\sigma_i^2}
@@ -89,13 +87,12 @@ p \equiv P (T ≥ T_{obs} ~|~ \mathcal{H})
 ```
 If ``\mathcal{H}`` is correct and all parameters are fixed, then ``p`` is a random variable with uniform distribution on ``[0, 1]``. An incorrect model will typically yield smaller values of ``p``.
 
-<!-- Refer to 10.1103/PhysRevD.83.012004 for the interpretation of p values -->
+See Frederik Beaujean, Allen Caldwell, Daniel Kollar, Kevin Kroeninger. *p-Values for Model Evaluation*. [arxiv[(https://arxiv.org/abs/1011.1674) for more information on interpreting p values.
 
 ### Approximation for large numbers of observations
 ---
 
 The cost for calculating the exact `p-value` for the Squares statistic as described in the initial paper[^1], scales with the number ``N`` of observations  like ``\exp[N^{\frac{1}{2}}]/N`` and quickly grows too large for ``N \gtrsim 80``.
-<!-- The rule of thumb N > 80 was true for my slow first implementation in mathematica -->
 
 The authors derived an approximation for large numbers of data in the follow-up paper[^2].
 

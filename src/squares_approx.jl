@@ -89,7 +89,7 @@ function (integrand::IntegrandData)(x::Real)
 end
  
 """
-    Delta(T_obs::Real, Nl::Integer, Nr::Integer, epsrel::Real, epsabs::Real)
+    Delta(T_obs::Real, Nl::Integer, Nr::Integer, [epsrel::Nothing, epsabs::::Union{Real, Nothing}])
 
 Compute the Δ(T_obs | N_l, N_r) term defined in equation (13) in 
 
@@ -102,10 +102,11 @@ relative and absolute target precision `epsrel` and `epsabs`. If not specified, 
 values of `quadgk()` are used.
 See https://juliamath.github.io/QuadGK.jl/stable/ for documentation.
 """
-function Delta(T_obs::Real, Nl::Integer, Nr::Integer, epsrel::Nothing = nothing, epsabs::Real = nothing)
+function Delta(T_obs::Real, Nl::Integer, Nr::Integer, epsrel::Nothing = nothing, epsabs::Union{Real, Nothing} = nothing)
 
     F = IntegrandData(T_obs, Nl, Nr)
-    return quadgk(F, 0, T_obs, rtol = epsrel, atol = epsabs, order = 10)
+    I = quadgk(F, 0, T_obs, rtol = epsrel, atol = epsabs, order = 10)
+    return I[1]
 end
 
 """
@@ -116,8 +117,14 @@ function for the Squares test statistic at `T_obs`,
 the value of the Squares statistic observed in the data. 
 The total number of datapoints is `L = n * N`, if not defined otherwise, the function chooses the default values `N = 80` and `n = L / N`.
 
-The accuracy's lower bound is `10^(-14)`, a desired accuracy up to this boundary can be specified with the optional `epsp` argument.
-See documentation on Accuracy.
+To specify a certain choice for `N` and `n`, do:
+
+    squares_cdf_approx(T_obs::Real,  Ns::AbstractArray, epsp::Real = 0)
+
+With `Ns` being an array holding `N::Integer` and `n::Real` as its first and second element: Ns = [N, n].
+
+The accuracy's lower bound is `n * 10^(-14)`, a desired accuracy up to this boundary can be specified with the optional `epsp` argument.
+See documentation on Accuracy under `Guide/Details of computation`.
 
 This function implements equation (17) from:
 
@@ -136,42 +143,51 @@ function squares_cdf_approx(T_obs::Real, L::Integer, epsp::Real = 0)
 
         epsabs = (epsp / n) * 0.1
         F = squares_cdf(T_obs, N)
-        Fn1 = (F / (1 + Delta(T_obs, N, N, nothing, epsabs)[1]))^(n - 1)
+        Fn1 = (F / (1 + Delta(T_obs, N, N, nothing, epsabs)))^(n - 1)
         return F * Fn1
     end
         
     F = squares_cdf(T_obs, N)
-    Fn1 = (F / (1 + Delta(T_obs, N, N)[1]))^(n - 1)
+    Fn1 = (F / (1 + Delta(T_obs, N, N)))^(n - 1)
     return F * Fn1
 end
 
-function squares_cdf_approx(T_obs::Real, N::Integer, n::Real,  epsp::Real = 0)
+function squares_cdf_approx(T_obs::Real, Ns::AbstractArray, epsp::Real = 0)
+    
+    N = Integer(Ns[1])
+    n = Ns[2]
 
     @argcheck (epsp == 0 || epsp / n >= 10^(-14)) error("The desired accuracy is too high. See documentation on Accuracy.")
-
+   
     if epsp != 0
 
         epsabs = (epsp / n) * 0.1
         F = squares_cdf(T_obs, N)
-        Fn1 = (F / (1 + Delta(T_obs, N, N, nothing, epsabs)[1]))^(n - 1)
+        Fn1 = (F / (1 + Delta(T_obs, N, N, nothing, epsabs)))^(n - 1)
         return F * Fn1
     end
         
     F = squares_cdf(T_obs, N)
-    Fn1 = (F / (1 + Delta(T_obs, N, N)[1]))^(n - 1)
+    Fn1 = (F / (1 + Delta(T_obs, N, N)))^(n - 1)
     return F * Fn1
 end
 
 """
-    squares_pvalue_approx(T_obs::Real, N::Integer, n::Real, [epsrel::Real, epsabs::Real])
+    squares_pvalue_approx(T_obs::Real, L::Integer, [epsp::Real])
 
-Compute an approximation of P(T >= `T_obs` | `n * N`), the p value for the Squares test 
+Compute an approximation of P(T >= `T_obs` | `L`), the p value for the Squares test 
 statistic T being larger or equal to `T_obs`, 
 the value of the Squares statistic observed in the data. 
 The total number of datapoints is `L = n * N`, if not defined otherwise, the function chooses the default values `N = 80` and `n = L / N`.
 
-The accuracy's lower bound is `10^(-14)`, a desired accuracy up to this boundary can be specified with the optional `epsp` argument.
-See documentation on Accuracy.
+To specify a certain choice for `N` and `n`, do:
+
+    squares_pvalue_approx(T_obs::Real, Ns::AbstractArray,  [epsp::Real])
+ 
+With `Ns` being an array holding `N::Integer` and `n::Real` as its first and second element: Ns = [N, n]
+
+The accuracy's lower bound is `n * 10^(-14)`, a desired accuracy up to this boundary can be specified with the optional `epsp` argument.
+See documentation on Accuracy under `Guide/Details of computation`.
 
 Via `squares_cdf_approx()` this function implements equation (17) from:
 
@@ -180,12 +196,12 @@ Frederik Beaujean and Allen Caldwell. *Is the bump significant? An axion-search 
 https://arxiv.org/abs/1710.06642
   
 """
-function squares_pvalue_approx(T_obs::Real, L::Integer,  epsp::Real = 0)
+function squares_pvalue_approx(T_obs::Real, L::Integer, epsp::Real = 0)
 
     return 1 - squares_cdf_approx(T_obs, L, epsp)
 end
 
-function squares_pvalue_approx(T_obs::Real, N::Integer, n::Real,  epsp::Real = 0)
+function squares_pvalue_approx(T_obs::Real, Ns::AbstractArray,  epsp::Real = 0)
 
-    return 1 - squares_cdf_approx(T_obs, N, n, epsp)
+    return 1 - squares_cdf_approx(T_obs, Ns, epsp)
 end

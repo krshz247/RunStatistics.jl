@@ -22,5 +22,3 @@ import Documenter
     Documenter.doctest(RunStatistics)
 
 end # testset
-
-

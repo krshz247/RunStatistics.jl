@@ -13,7 +13,6 @@ This code is based on the [original implementation](https://github.com/fredRos/r
 ## Package Features
 ---
 
-<!-- Do you have measurements to support your claim that the performance is better in the julia implementation? -->
 - Calculate the [*p-value*](https://en.wikipedia.org/wiki/P-value) for the *Squares test statistic*[^1] ``T`` observed in ``N`` independent trials of gaussian uncertainty
 - Improved performance and readability over the [original implementation](https://github.com/fredRos/runs) thanks to Julia
 - Inbuilt implementation for generating [*integer partitions*](https://en.wikipedia.org/wiki/Partition_(number_theory)) of an integer ``n`` into ``k`` parts
