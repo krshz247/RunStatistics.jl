@@ -60,7 +60,7 @@ function squares_cdf(T_obs::Real, N::Integer)
 
     log_cumulative = cachechi2(T_obs, N)
 
-    logpow2N1 = (N <= 63) ? log((1 << N) - 1) : N * log(2)
+    logpow2N1 = (N <= (8 * sizeof(Int) - 1)) ? log((1 << N) - 1) : N * log(2)
 
     p = zero(T)
 
